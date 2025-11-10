@@ -10,30 +10,12 @@ $offset = ($page - 1) * $perPage;
 $page_title = 'Jobs';
 include __DIR__ . '/includes/header.php';
 
-// Inline table CSS (since header does not include table styles)
-?>
-<style>
-.jobs-table { width: 100%; border-collapse: collapse; margin-top: 18px; }
-.jobs-table th, .jobs-table td { padding: 12px; border: 1px solid #2a2f36; text-align: left; color: #e0e0e0; }
-.jobs-table thead { background: #2c3e50; }
-.jobs-table tbody tr:nth-child(even) { background: #242831; }
-.jobs-table tbody tr:hover { background: #2f3339; }
-a { color: #87e0a4; text-decoration: none; }
-.meta { color:#9aa3a8; margin-top:8px; }
-.pagination { display:flex; gap:8px; flex-wrap:wrap; margin: 20px 0; align-items: center; }
-.page-link { background:#252830; color:#e0e0e0; padding:8px 12px; border-radius:6px; text-decoration:none; border:1px solid #333; }
-.page-link.active { background:#4CAF50; color:#0b0b0b; font-weight:600; }
-.page-link.disabled { opacity:0.5; pointer-events:none; }
-.container { padding-bottom: 30px; }
-</style>
-
-<?php
 // Count total
 try {
     $countStmt = $pdo->query("SELECT COUNT(*) AS cnt FROM jobs");
     $total = (int)$countStmt->fetch(PDO::FETCH_ASSOC)['cnt'];
 } catch (PDOException $e) {
-    echo "<div style='color:#ffb3b3;padding:12px;border-radius:6px;background:#3a1b1b;'>Database error: " . htmlspecialchars($e->getMessage()) . "</div>";
+    echo "<div class='alert alert-error'>Database error: " . htmlspecialchars($e->getMessage()) . "</div>";
     include __DIR__ . '/includes/footer.php';
     exit;
 }
@@ -52,7 +34,7 @@ try {
     $stmt->execute();
     $jobs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    echo "<div style='color:#ffb3b3;padding:12px;border-radius:6px;background:#3a1b1b;'>Database error: " . htmlspecialchars($e->getMessage()) . "</div>";
+    echo "<div class='alert alert-error'>Database error: " . htmlspecialchars($e->getMessage()) . "</div>";
     include __DIR__ . '/includes/footer.php';
     exit;
 }

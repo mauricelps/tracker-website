@@ -1,6 +1,7 @@
 <?php
 // upload_avatar.php - secure avatar upload (updated to check session ownership)
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/csrf.php';
 require_once __DIR__ . '/db.php';
 
 if (!is_logged_in()) {
@@ -14,6 +15,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo "Method not allowed.";
     exit;
 }
+
+// Validate CSRF token
+CSRF::validateRequest();
 
 $user = current_user();
 if (!$user) {

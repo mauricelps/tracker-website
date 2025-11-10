@@ -80,43 +80,44 @@ $avatar = $user['avatar_url'] ? $user['avatar_url'] : $defaultAvatar;
 
 <h1><?php echo htmlspecialchars($user['username']); ?></h1>
 
-<div style="display:flex;gap:20px;align-items:flex-start;max-width:1000px;">
+<div class="grid-2" style="max-width:1000px;">
     <div style="width:140px;">
-        <div style="width:140px;height:140px;border-radius:8px;overflow:hidden;border:1px solid #333;background:#23242a;">
+        <div style="width:140px;height:140px;border-radius:8px;overflow:hidden;border:1px solid var(--border-color-lighter);background:var(--bg-secondary);">
             <img src="<?php echo htmlspecialchars($avatar); ?>" alt="Avatar" style="width:100%;height:100%;object-fit:cover;display:block;">
         </div>
         <?php if (is_logged_in() && current_user() && current_user()['id'] == $user['id']): ?>
             <form action="/upload_avatar.php" method="post" enctype="multipart/form-data" style="margin-top:12px;">
+                <?php echo CSRF::getTokenInput(); ?>
                 <input type="hidden" name="user_id" value="<?php echo (int)$user['id']; ?>">
-                <label style="color:#9aa3a8;font-size:0.9rem;">Change avatar
+                <label style="color:var(--text-secondary);font-size:0.9rem;">Change avatar
                     <input type="file" name="avatar" accept="image/*" style="display:block;margin-top:8px;">
                 </label>
-                <button type="submit" style="margin-top:8px;background:#4CAF50;color:#07110b;border:none;padding:8px 12px;border-radius:6px;">Upload</button>
+                <button type="submit" class="btn" style="margin-top:8px;">Upload</button>
             </form>
         <?php endif; ?>
     </div>
 
     <div style="flex:1;">
         <div style="display:flex;gap:12px;flex-wrap:wrap;">
-            <div style="background:#252830;padding:12px;border-radius:8px;border:1px solid #333;">Total Jobs<br><strong style="font-size:1.2rem;"><?php echo $totalJobs; ?></strong></div>
-            <div style="background:#252830;padding:12px;border-radius:8px;border:1px solid #333;">Delivered<br><strong style="font-size:1.2rem;"><?php echo $delivered; ?></strong></div>
-            <div style="background:#252830;padding:12px;border-radius:8px;border:1px solid #333;">Cancelled<br><strong style="font-size:1.2rem;"><?php echo $cancelled; ?></strong></div>
-            <div style="background:#252830;padding:12px;border-radius:8px;border:1px solid #333;">Real (≤100 km/h)<br><strong style="font-size:1.2rem;"><?php echo $realCount; ?></strong></div>
-            <div style="background:#252830;padding:12px;border-radius:8px;border:1px solid #333;">Race (≥101 km/h)<br><strong style="font-size:1.2rem;"><?php echo $raceCount; ?></strong></div>
+            <div class="kpi">Total Jobs<br><strong style="font-size:1.2rem;"><?php echo $totalJobs; ?></strong></div>
+            <div class="kpi">Delivered<br><strong style="font-size:1.2rem;"><?php echo $delivered; ?></strong></div>
+            <div class="kpi">Cancelled<br><strong style="font-size:1.2rem;"><?php echo $cancelled; ?></strong></div>
+            <div class="kpi">Real (≤100 km/h)<br><strong style="font-size:1.2rem;"><?php echo $realCount; ?></strong></div>
+            <div class="kpi">Race (≥101 km/h)<br><strong style="font-size:1.2rem;"><?php echo $raceCount; ?></strong></div>
         </div>
 
-        <div style="margin-top:20px;background:#252830;padding:14px;border-radius:8px;">
-            <h3 style="margin-top:0;color:#4CAF50;">Jobs (page <?php echo $page; ?> / <?php echo $totalPages; ?>)</h3>
-            <table style="width:100%;border-collapse:collapse;">
-                <thead style="background:#2c3e50;color:#bde5c8;">
+        <div class="card">
+            <h3 style="margin-top:0;color:var(--accent-primary);">Jobs (page <?php echo $page; ?> / <?php echo $totalPages; ?>)</h3>
+            <table>
+                <thead>
                     <tr>
-                        <th style="padding:8px;border:1px solid #2a2f36;">JobID</th>
-                        <th style="padding:8px;border:1px solid #2a2f36;">Status</th>
-                        <th style="padding:8px;border:1px solid #2a2f36;">KM</th>
-                        <th style="padding:8px;border:1px solid #2a2f36;">Start</th>
-                        <th style="padding:8px;border:1px solid #2a2f36;">Destination</th>
-                        <th style="padding:8px;border:1px solid #2a2f36;">Income</th>
-                        <th style="padding:8px;border:1px solid #2a2f36;">Ended</th>
+                        <th>JobID</th>
+                        <th>Status</th>
+                        <th>KM</th>
+                        <th>Start</th>
+                        <th>Destination</th>
+                        <th>Income</th>
+                        <th>Ended</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -125,13 +126,13 @@ $avatar = $user['avatar_url'] ? $user['avatar_url'] : $defaultAvatar;
                     <?php else: ?>
                         <?php foreach ($jobs as $j): ?>
                             <tr>
-                                <td style="padding:8px;border:1px solid #2a2f36;"><a href="/job/<?php echo (int)$j['id']; ?>" style="color:#87e0a4;"><?php echo (int)$j['id']; ?></a></td>
-                                <td style="padding:8px;border:1px solid #2a2f36;"><?php echo htmlspecialchars(ucfirst($j['status'])); ?></td>
-                                <td style="padding:8px;border:1px solid #2a2f36;"><?php echo is_null($j['driven_distance_km']) ? '—' : round($j['driven_distance_km'],2); ?></td>
-                                <td style="padding:8px;border:1px solid #2a2f36;"><?php echo htmlspecialchars($j['source_city'] ?? '—'); ?></td>
-                                <td style="padding:8px;border:1px solid #2a2f36;"><?php echo htmlspecialchars($j['destination_city'] ?? '—'); ?></td>
-                                <td style="padding:8px;border:1px solid #2a2f36;"><?php echo is_null($j['income']) ? '—' : number_format($j['income']); ?></td>
-                                <td style="padding:8px;border:1px solid #2a2f36;"><?php echo htmlspecialchars($j['end_time'] ?? '—'); ?></td>
+                                <td><a href="/job/<?php echo (int)$j['id']; ?>"><?php echo (int)$j['id']; ?></a></td>
+                                <td><?php echo htmlspecialchars(ucfirst($j['status'])); ?></td>
+                                <td><?php echo is_null($j['driven_distance_km']) ? '—' : round($j['driven_distance_km'],2); ?></td>
+                                <td><?php echo htmlspecialchars($j['source_city'] ?? '—'); ?></td>
+                                <td><?php echo htmlspecialchars($j['destination_city'] ?? '—'); ?></td>
+                                <td><?php echo is_null($j['income']) ? '—' : number_format($j['income']); ?></td>
+                                <td><?php echo htmlspecialchars($j['end_time'] ?? '—'); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     <?php endif; ?>
@@ -140,11 +141,11 @@ $avatar = $user['avatar_url'] ? $user['avatar_url'] : $defaultAvatar;
 
             <div style="margin-top:12px;">
                 <?php if ($page > 1): ?>
-                    <a class="page-link" href="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] . '?' . http_build_query(['id'=>$user_id,'page'=>$page-1])); ?>" style="margin-right:8px;background:#252830;padding:6px 10px;border-radius:6px;color:#e0e0e0;text-decoration:none;border:1px solid #333;">&laquo; Prev</a>
+                    <a class="page-link" href="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] . '?' . http_build_query(['id'=>$user_id,'page'=>$page-1])); ?>" style="margin-right:8px;">&laquo; Prev</a>
                 <?php endif; ?>
-                <span style="color:#9aa3a8;">Page <?php echo $page; ?> / <?php echo $totalPages; ?></span>
+                <span style="color:var(--text-secondary);">Page <?php echo $page; ?> / <?php echo $totalPages; ?></span>
                 <?php if ($page < $totalPages): ?>
-                    <a class="page-link" href="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] . '?' . http_build_query(['id'=>$user_id,'page'=>$page+1])); ?>" style="margin-left:8px;background:#252830;padding:6px 10px;border-radius:6px;color:#e0e0e0;text-decoration:none;border:1px solid #333;">Next &raquo;</a>
+                    <a class="page-link" href="<?php echo htmlspecialchars($_SERVER['PHP_SELF'] . '?' . http_build_query(['id'=>$user_id,'page'=>$page+1])); ?>" style="margin-left:8px;">Next &raquo;</a>
                 <?php endif; ?>
             </div>
         </div>
