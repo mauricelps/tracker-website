@@ -307,6 +307,13 @@ h1 {
   margin-bottom: 16px;
 }
 
+h2 {
+  color: var(--accent-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 6px;
+  margin-top: 22px;
+}
+
 .small,
 .meta {
   font-size: 0.9rem;
@@ -370,10 +377,17 @@ h1 {
 /* Tables */
 table,
 .jobs-table,
-.recent-table {
+.recent-table,
+.stats-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 12px;
+}
+
+.stats-table {
+  width: 90%;
+  margin: 18px auto 36px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
 table th,
@@ -381,35 +395,50 @@ table td,
 .jobs-table th,
 .jobs-table td,
 .recent-table th,
-.recent-table td {
+.recent-table td,
+.stats-table th,
+.stats-table td {
   padding: 10px;
   border: 1px solid var(--border-color-light);
   text-align: left;
   color: var(--text-primary);
 }
 
+.stats-table th,
+.stats-table td {
+  padding: 10px 12px;
+}
+
 table thead,
 .jobs-table thead,
-.recent-table thead {
+.recent-table thead,
+.stats-table thead {
   background: var(--table-header);
   color: var(--accent-lighter);
 }
 
 table thead th,
 .jobs-table thead th,
-.recent-table thead th {
+.recent-table thead th,
+.stats-table thead th {
   font-weight: 600;
+}
+
+.stats-table thead th {
+  font-weight: 700;
 }
 
 table tbody tr:nth-child(even),
 .jobs-table tbody tr:nth-child(even),
-.recent-table tbody tr:nth-child(even) {
+.recent-table tbody tr:nth-child(even),
+.stats-table tbody tr:nth-child(even) {
   background: var(--table-even);
 }
 
 table tbody tr:hover,
 .jobs-table tbody tr:hover,
-.recent-table tbody tr:hover {
+.recent-table tbody tr:hover,
+.stats-table tbody tr:hover {
   background: var(--card-hover);
 }
 

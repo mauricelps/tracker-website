@@ -1,43 +1,63 @@
 <?php
-// login.php - simple login form & processing (no registration)
+// login.php - Steam OpenID authentication only
 require_once __DIR__ . '/includes/auth.php';
 
-$err = '';
-$return = isset($_GET['return']) ? $_GET['return'] : '/';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
-    $password = $_POST['password'] ?? '';
-    $return = $_POST['return'] ?? '/';
-    if (attempt_login(trim($username), $password)) {
-        header('Location: ' . ($return ?: '/'));
-        exit;
-    } else {
-        $err = 'Invalid credentials.';
-    }
+// If already logged in, redirect to home
+if (is_logged_in()) {
+    header('Location: /');
+    exit;
 }
+
+// Check for login error from callback
+$error = $_SESSION['login_error'] ?? '';
+unset($_SESSION['login_error']);
+
+// Steam OpenID URL
+$steamOpenIdUrl = 'https://steamcommunity.com/openid/login';
+$returnTo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . 
+            '://' . $_SERVER['HTTP_HOST'] . '/auth_callback.php';
+$realm = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . 
+         '://' . $_SERVER['HTTP_HOST'];
+
+// Build Steam login URL
+$params = [
+    'openid.ns' => 'http://specs.openid.net/auth/2.0',
+    'openid.mode' => 'checkid_setup',
+    'openid.return_to' => $returnTo,
+    'openid.realm' => $realm,
+    'openid.identity' => 'http://specs.openid.net/auth/2.0/identifier_select',
+    'openid.claimed_id' => 'http://specs.openid.net/auth/2.0/identifier_select',
+];
+$steamLoginUrl = $steamOpenIdUrl . '?' . http_build_query($params);
 
 $page_title = 'Login';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<h1>Login</h1>
-<?php if ($err): ?>
-    <div style="background:#3a1b1b;color:#ffdede;padding:10px;border-radius:6px;margin-bottom:12px;"><?php echo htmlspecialchars($err); ?></div>
-<?php endif; ?>
-
-<form method="post" style="max-width:420px;">
-    <input type="hidden" name="return" value="<?php echo htmlspecialchars($return); ?>">
-    <label style="display:block;margin-bottom:8px;color:#9aa3a8;">Username or SteamID
-        <input name="username" required style="width:100%;padding:10px;margin-top:6px;border-radius:6px;border:1px solid #333;background:#121317;color:#e0e0e0;">
-    </label>
-    <label style="display:block;margin-bottom:8px;color:#9aa3a8;">Password
-        <input name="password" type="password" required style="width:100%;padding:10px;margin-top:6px;border-radius:6px;border:1px solid #333;background:#121317;color:#e0e0e0;">
-    </label>
-    <div style="margin-top:12px;">
-        <button type="submit" style="background:#4CAF50;color:#07110b;border:none;padding:10px 14px;border-radius:6px;font-weight:600;">Login</button>
-        <a href="/" style="margin-left:12px;color:#9aa3a8;">Cancel</a>
+<div class="card" style="max-width:500px;margin:60px auto;">
+    <h1 style="text-align:center;">Login with Steam</h1>
+    
+    <?php if ($error): ?>
+        <div class="alert alert-error">
+            <?php echo htmlspecialchars($error); ?>
+        </div>
+    <?php endif; ?>
+    
+    <p style="text-align:center;color:var(--text-secondary);">
+        Click the button below to sign in using your Steam account.
+    </p>
+    
+    <div style="text-align:center;margin-top:24px;">
+        <a href="<?php echo htmlspecialchars($steamLoginUrl); ?>" class="btn" style="padding:12px 24px;font-size:1.1rem;">
+            <span style="margin-right:8px;">🎮</span> Sign in through Steam
+        </a>
     </div>
-</form>
+    
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border-color);">
+        <p style="font-size:0.85rem;color:var(--text-secondary);text-align:center;">
+            By logging in, you agree to our terms of service and privacy policy.
+        </p>
+    </div>
+</div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

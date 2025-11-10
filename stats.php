@@ -31,22 +31,6 @@ function createRankingTable(array $rows, string $title, array $headers): void {
     echo "</tbody></table>";
 }
 
-// Inline CSS for tables (placed after includes/header - valid and effective)
-?>
-<style>
-/* Table styling for stats page (dark mode) */
-.stats-table { width: 90%; margin: 18px auto 36px; border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
-.stats-table thead { background: #2c3e50; }
-.stats-table th, .stats-table td { padding: 10px 12px; border: 1px solid #2a2f36; text-align: left; color: #e6f7ea; }
-.stats-table th { color: #bde5c8; font-weight: 700; }
-.stats-table tbody tr:nth-child(even) { background: #242831; }
-.stats-table tbody tr:hover { background: #2f3339; }
-h1 { color: #4CAF50; }
-h2 { color: #4CAF50; border-bottom: 1px solid rgba(76,175,80,0.12); padding-bottom: 6px; margin-top: 22px; }
-.container { padding-bottom: 30px; }
-</style>
-
-<?php
 // Fetch data
 try {
     // Total KM per driver (delivered)
@@ -113,7 +97,7 @@ try {
     $dest_company_rows = $pdo->query($dest_company_sql)->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (PDOException $e) {
-    echo "<div style='color:#ffb3b3;padding:12px;border-radius:6px;background:#3a1b1b;'>Database error: " . htmlspecialchars($e->getMessage()) . "</div>";
+    echo "<div class='alert alert-error'>Database error: " . htmlspecialchars($e->getMessage()) . "</div>";
     include __DIR__ . '/includes/footer.php';
     exit;
 }
