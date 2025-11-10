@@ -1,7 +1,7 @@
 <?php
 // includes/auth.php
 // Simple auth helper: session management, login/logout helpers, current user retrieval
-// NOTE: place this file in includes/ and ensure db.php is one level above (../db.php)
+// NOTE: Steam-only authentication - password authentication removed
 
 // Start session securely if not started yet
 if (session_status() === PHP_SESSION_NONE) {
@@ -41,54 +41,6 @@ function current_user(): ?array {
         // Log the error to PHP error log for debugging (do NOT echo to users)
         error_log('current_user() DB error: ' . $e->getMessage());
         return null;
-    }
-}
-
-/**
- * Attempt login with username (or steam id) + password.
- * Returns true on success (session user_id set), false otherwise.
- */
-function attempt_login(string $usernameOrSteam, string $password): bool {
-    global $pdo;
-
-    try {
-        // Prepare statement with named placeholder (single placeholder used twice by binding once)
-        $sql = "SELECT id, password_hash FROM users WHERE username = :u OR steamId = :u LIMIT 1";
-        $stmt = $pdo->prepare($sql);
-
-        // Bind once; ensures driver doesn't get mixed named/positional params
-        $stmt->bindValue(':u', $usernameOrSteam, PDO::PARAM_STR);
-        $stmt->execute();
-
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
-            // no user found
-            return false;
-        }
-
-        if (empty($row['password_hash'])) {
-            // user has no password set
-            return false;
-        }
-
-        if (password_verify($password, $row['password_hash'])) {
-            // success
-            $_SESSION['user_id'] = (int)$row['id'];
-            unset($_SESSION['current_user_cached']);
-            if (function_exists('session_regenerate_id')) {
-                session_regenerate_id(true);
-            }
-            return true;
-        }
-
-        // wrong password
-        return false;
-    } catch (Throwable $e) {
-        // Log details to server error log for debugging
-        error_log('attempt_login() DB error: ' . $e->getMessage());
-        // Optionally log stack trace:
-        error_log($e->getTraceAsString());
-        return false;
     }
 }
 

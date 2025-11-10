@@ -46,48 +46,48 @@ function translateGame(string $gameName): string { return match ($gameName) { "e
 ?>
 <h1>Job Details: #<?php echo htmlspecialchars($job['id']); ?></h1>
 
-<div style="max-width:900px;margin:20px auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-    <div style="background:#252830;padding:18px;border-radius:8px;">
-        <h3 style="color:#4CAF50;margin-top:0;">Driver Info</h3>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Driver</strong><span><?php echo htmlspecialchars($job['username'] ?? 'Unknown'); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Steam ID</strong><span><?php echo htmlspecialchars($job['driver_steam_id']); ?></span></div>
+<div class="grid-2" style="max-width:900px;margin:20px auto;">
+    <div class="card">
+        <h3 style="color:var(--accent-primary);margin-top:0;">Driver Info</h3>
+        <div class="flex-between" style="padding:6px 0;"><strong>Driver</strong><span><?php echo htmlspecialchars($job['username'] ?? 'Unknown'); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>Steam ID</strong><span><?php echo htmlspecialchars($job['driver_steam_id']); ?></span></div>
         <?php if (!empty($job['user_id'])): ?>
-            <div style="margin-top:8px;"><a href="/user/<?php echo (int)$job['user_id']; ?>" style="color:#87e0a4;">View driver profile</a></div>
+            <div style="margin-top:8px;"><a href="/user/<?php echo (int)$job['user_id']; ?>">View driver profile</a></div>
         <?php endif; ?>
     </div>
 
-    <div style="background:#252830;padding:18px;border-radius:8px;">
-        <h3 style="color:#4CAF50;margin-top:0;">Job Info</h3>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Game</strong><span><?php echo htmlspecialchars(translateGame($job['game'] ?? '')); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Status</strong><span><?php echo htmlspecialchars(ucfirst($job['status'] ?? '')); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Market</strong><span><?php echo htmlspecialchars($job['market'] ?? ''); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Income</strong><span>€ <?php echo is_null($job['income']) ? '—' : number_format($job['income']); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>XP</strong><span><?php echo is_null($job['xp']) ? '0' : htmlspecialchars($job['xp']); ?></span></div>
+    <div class="card">
+        <h3 style="color:var(--accent-primary);margin-top:0;">Job Info</h3>
+        <div class="flex-between" style="padding:6px 0;"><strong>Game</strong><span><?php echo htmlspecialchars(translateGame($job['game'] ?? '')); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>Status</strong><span><?php echo htmlspecialchars(ucfirst($job['status'] ?? '')); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>Market</strong><span><?php echo htmlspecialchars($job['market'] ?? ''); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>Income</strong><span>€ <?php echo is_null($job['income']) ? '—' : number_format($job['income']); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>XP</strong><span><?php echo is_null($job['xp']) ? '0' : htmlspecialchars($job['xp']); ?></span></div>
     </div>
 
-    <div style="background:#252830;padding:18px;border-radius:8px;">
-        <h3 style="color:#4CAF50;margin-top:0;">Cargo & Route</h3>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Cargo</strong><span><?php echo htmlspecialchars($job['cargo'] ?? '—'); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Mass</strong><span><?php echo isset($job['cargoMass']) ? (($job['cargoMass'] / 1000) . ' t') : '—'; ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>From</strong><span><?php echo htmlspecialchars(($job['source_city'] ?? '—') . ($job['source_company'] ? ' (' . $job['source_company'] . ')' : '')); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>To</strong><span><?php echo htmlspecialchars(($job['destination_city'] ?? '—') . ($job['destination_company'] ? ' (' . $job['destination_company'] . ')' : '')); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Distance Driven</strong><span><?php echo is_null($job['driven_distance_km']) ? '—' : round($job['driven_distance_km'],2) . ' km'; ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Duration</strong><span><?php echo isset($job['duration_seconds']) ? formatDuration((int)$job['duration_seconds']) : '—'; ?></span></div>
+    <div class="card">
+        <h3 style="color:var(--accent-primary);margin-top:0;">Cargo & Route</h3>
+        <div class="flex-between" style="padding:6px 0;"><strong>Cargo</strong><span><?php echo htmlspecialchars($job['cargo'] ?? '—'); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>Mass</strong><span><?php echo isset($job['cargoMass']) ? (($job['cargoMass'] / 1000) . ' t') : '—'; ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>From</strong><span><?php echo htmlspecialchars(($job['source_city'] ?? '—') . ($job['source_company'] ? ' (' . $job['source_company'] . ')' : '')); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>To</strong><span><?php echo htmlspecialchars(($job['destination_city'] ?? '—') . ($job['destination_company'] ? ' (' . $job['destination_company'] . ')' : '')); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>Distance Driven</strong><span><?php echo is_null($job['driven_distance_km']) ? '—' : round($job['driven_distance_km'],2) . ' km'; ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>Duration</strong><span><?php echo isset($job['duration_seconds']) ? formatDuration((int)$job['duration_seconds']) : '—'; ?></span></div>
     </div>
 
-    <div style="background:#252830;padding:18px;border-radius:8px;">
-        <h3 style="color:#4CAF50;margin-top:0;">Vehicle</h3>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Truck</strong><span><?php echo htmlspecialchars($job['truck'] ?? '—'); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Truck Plate</strong><span><?php echo htmlspecialchars($job['truckLicensePlate'] ?? '—'); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Trailer Plate</strong><span><?php echo htmlspecialchars($job['trailerLicensePlate'] ?? '—'); ?></span></div>
-        <div style="display:flex;justify-content:space-between;padding:6px 0;"><strong>Max Speed</strong><span><?php echo is_null($job['maxSpeed']) ? '—' : round($job['maxSpeed']) . ' km/h'; ?></span></div>
+    <div class="card">
+        <h3 style="color:var(--accent-primary);margin-top:0;">Vehicle</h3>
+        <div class="flex-between" style="padding:6px 0;"><strong>Truck</strong><span><?php echo htmlspecialchars($job['truck'] ?? '—'); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>Truck Plate</strong><span><?php echo htmlspecialchars($job['truckLicensePlate'] ?? '—'); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>Trailer Plate</strong><span><?php echo htmlspecialchars($job['trailerLicensePlate'] ?? '—'); ?></span></div>
+        <div class="flex-between" style="padding:6px 0;"><strong>Max Speed</strong><span><?php echo is_null($job['maxSpeed']) ? '—' : round($job['maxSpeed']) . ' km/h'; ?></span></div>
     </div>
 
     <?php if (!empty($transports)): ?>
-    <div style="grid-column:1 / -1;background:#252830;padding:18px;border-radius:8px;">
-        <h3 style="color:#4CAF50;margin-top:0;">Transports Used (Ferry / Train)</h3>
+    <div class="card" style="grid-column:1 / -1;">
+        <h3 style="color:var(--accent-primary);margin-top:0;">Transports Used (Ferry / Train)</h3>
         <?php foreach ($transports as $t): ?>
-            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #333;">
+            <div class="flex-between" style="padding:6px 0;border-bottom:1px solid var(--border-color);">
                 <strong><?php echo htmlspecialchars(ucfirst($t['transport_type'])); ?></strong>
                 <span><?php echo htmlspecialchars($t['source_name']) . ' → ' . htmlspecialchars($t['destination_name']); ?></span>
             </div>
