@@ -311,6 +311,13 @@ All API endpoints use prepared statements for security.
 - Secure session regeneration on login
 - Input validation and sanitization
 
+**Note:** The following files are development/debug utilities and should be deleted in production:
+- `generate_password_hash.php` - Legacy utility (Steam-only auth doesn't need password hashes)
+- `verify_password.php` - Legacy verification tool
+- `login_debug.php` - Debug logger for troubleshooting
+
+These files have their own access tokens and are not part of the main application.
+
 ## File Structure
 
 ```
