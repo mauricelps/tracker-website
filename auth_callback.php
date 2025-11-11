@@ -1,63 +1,11 @@
 <?php
 // auth_callback.php - Handle Steam OpenID authentication callback
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/steam_openid.php';
 require_once __DIR__ . '/db.php';
 
-function validateSteamLogin(): ?string {
-    // Validate OpenID response
-    $params = $_GET;
-    
-    // Check if we received an OpenID response
-    if (!isset($params['openid_mode'])) {
-        return null;
-    }
-    
-    if ($params['openid_mode'] === 'cancel') {
-        return null;
-    }
-    
-    // Validate the response with Steam
-    $params['openid.mode'] = 'check_authentication';
-    
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, 'https://steamcommunity.com/openid/login');
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-    
-    $response = curl_exec($ch);
-    curl_close($ch);
-    
-    if (!$response) {
-        return null;
-    }
-    
-    // Check if validation succeeded
-    if (preg_match('/is_valid\s*:\s*true/i', $response)) {
-        // Extract Steam ID from claimed_id
-        if (preg_match('/^https?:\/\/steamcommunity\.com\/openid\/id\/(\d+)$/', $params['openid_claimed_id'], $matches)) {
-            return $matches[1];
-        }
-    }
-    
-    return null;
-}
-
-function getSteamProfile(string $steamId): ?array {
-    // You would need a Steam API key for this
-    // For now, we'll just return basic info from Steam ID
-    // TODO: Implement Steam API call to get profile data
-    return [
-        'steamId' => $steamId,
-        'username' => 'User_' . substr($steamId, -6), // Temporary username
-        'avatar_url' => '/assets/default-avatar.png'
-    ];
-}
-
-// Process the callback
-$steamId = validateSteamLogin();
+// Process the callback using robust Steam OpenID validation
+$steamId = SteamOpenID::validateLogin($_GET);
 
 if (!$steamId) {
     // Validation failed
@@ -66,8 +14,9 @@ if (!$steamId) {
     exit;
 }
 
-// Get Steam profile data
-$profile = getSteamProfile($steamId);
+// Get Steam profile data (use environment variable for API key if available)
+$steamApiKey = getenv('STEAM_API_KEY') ?: '';
+$profile = SteamOpenID::getSteamProfile($steamId, $steamApiKey);
 
 if (!$profile) {
     $_SESSION['login_error'] = 'Failed to retrieve Steam profile.';
