@@ -1,6 +1,7 @@
 <?php
 // login.php - Steam OpenID authentication only
 require_once __DIR__ . '/includes/auth.php';
+require_once __DIR__ . '/includes/steam_openid.php';
 
 // If already logged in, redirect to home
 if (is_logged_in()) {
@@ -12,23 +13,13 @@ if (is_logged_in()) {
 $error = $_SESSION['login_error'] ?? '';
 unset($_SESSION['login_error']);
 
-// Steam OpenID URL
-$steamOpenIdUrl = 'https://steamcommunity.com/openid/login';
+// Build Steam login URL using SteamOpenID helper
 $returnTo = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . 
             '://' . $_SERVER['HTTP_HOST'] . '/auth_callback.php';
 $realm = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . 
          '://' . $_SERVER['HTTP_HOST'];
 
-// Build Steam login URL
-$params = [
-    'openid.ns' => 'http://specs.openid.net/auth/2.0',
-    'openid.mode' => 'checkid_setup',
-    'openid.return_to' => $returnTo,
-    'openid.realm' => $realm,
-    'openid.identity' => 'http://specs.openid.net/auth/2.0/identifier_select',
-    'openid.claimed_id' => 'http://specs.openid.net/auth/2.0/identifier_select',
-];
-$steamLoginUrl = $steamOpenIdUrl . '?' . http_build_query($params);
+$steamLoginUrl = SteamOpenID::getLoginUrl($returnTo, $realm);
 
 $page_title = 'Login';
 include __DIR__ . '/includes/header.php';
