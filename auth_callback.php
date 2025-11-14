@@ -2,6 +2,7 @@
 // auth_callback.php - Handle Steam OpenID authentication callback
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/steam_openid.php';
+require_once __DIR__ . '/includes/steam_api.php';
 require_once __DIR__ . '/db.php';
 
 // Process the callback using robust Steam OpenID validation
@@ -14,14 +15,30 @@ if (!$steamId) {
     exit;
 }
 
-// Get Steam profile data (use environment variable for API key if available)
-$steamApiKey = getenv('STEAM_API_KEY') ?: '';
-$profile = SteamOpenID::getSteamProfile($steamId, $steamApiKey);
+// Get Steam profile data using Steam Web API if key is present
+$profile = null;
+$steamApiKey = SteamAPI::getApiKey();
 
+if ($steamApiKey) {
+    $apiProfile = SteamAPI::getPlayerSummaries($steamId, $steamApiKey);
+    if ($apiProfile) {
+        $profile = [
+            'steamId' => $steamId,
+            'username' => $apiProfile['personaname'],
+            'display_name' => $apiProfile['personaname'],
+            'avatar_url' => SteamAPI::getAvatarUrl($apiProfile, 'full'),
+        ];
+    }
+}
+
+// Fallback if API call failed or no API key
 if (!$profile) {
-    $_SESSION['login_error'] = 'Failed to retrieve Steam profile.';
-    header('Location: /login.php');
-    exit;
+    $profile = [
+        'steamId' => $steamId,
+        'username' => 'User_' . substr($steamId, -6),
+        'display_name' => 'User_' . substr($steamId, -6),
+        'avatar_url' => '/assets/default-avatar.png',
+    ];
 }
 
 try {
@@ -31,24 +48,40 @@ try {
     $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($existingUser) {
-        // User exists, log them in
+        // User exists, update their profile data when Steam API key is present
         $userId = $existingUser['id'];
         
-        // Update last login time (optional)
-        $updateStmt = $pdo->prepare("UPDATE users SET avatar_url = :avatar WHERE id = :id");
-        $updateStmt->execute([
-            ':avatar' => $profile['avatar_url'],
-            ':id' => $userId
-        ]);
+        if ($steamApiKey) {
+            // Update display_name and avatar_url from Steam API
+            $updateStmt = $pdo->prepare("
+                UPDATE users 
+                SET display_name = :display_name, 
+                    avatar_url = :avatar 
+                WHERE id = :id
+            ");
+            $updateStmt->execute([
+                ':display_name' => $profile['display_name'],
+                ':avatar' => $profile['avatar_url'],
+                ':id' => $userId
+            ]);
+        } else {
+            // Only update avatar if no API key
+            $updateStmt = $pdo->prepare("UPDATE users SET avatar_url = :avatar WHERE id = :id");
+            $updateStmt->execute([
+                ':avatar' => $profile['avatar_url'],
+                ':id' => $userId
+            ]);
+        }
     } else {
         // Create new user
         $insertStmt = $pdo->prepare("
-            INSERT INTO users (username, steamId, avatar_url, created_at) 
-            VALUES (:username, :steamId, :avatar, NOW())
+            INSERT INTO users (username, steamId, display_name, avatar_url, created_at) 
+            VALUES (:username, :steamId, :display_name, :avatar, NOW())
         ");
         $insertStmt->execute([
             ':username' => $profile['username'],
             ':steamId' => $steamId,
+            ':display_name' => $profile['display_name'],
             ':avatar' => $profile['avatar_url']
         ]);
         $userId = $pdo->lastInsertId();
@@ -73,3 +106,4 @@ try {
     header('Location: /login.php');
     exit;
 }
+

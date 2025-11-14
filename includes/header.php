@@ -5,6 +5,20 @@ require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/csrf.php';
 $user = current_user();
 $avatarUrl = $user['avatar_url'] ?? '/assets/default-avatar.png';
+
+// Check if user is admin
+$isAdmin = false;
+if ($user) {
+    global $pdo;
+    try {
+        $stmt = $pdo->prepare("SELECT is_admin FROM users WHERE id = :id LIMIT 1");
+        $stmt->execute([':id' => $user['id']]);
+        $userData = $stmt->fetch(PDO::FETCH_ASSOC);
+        $isAdmin = ($userData && $userData['is_admin']);
+    } catch (PDOException $e) {
+        error_log('Error checking admin status: ' . $e->getMessage());
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -23,6 +37,9 @@ $avatarUrl = $user['avatar_url'] ?? '/assets/default-avatar.png';
             <a href="/">Home</a>
             <a href="/stats">Stats</a>
             <a href="/jobs">Jobs</a>
+            <?php if ($isAdmin): ?>
+                <a href="/admin_settings.php" style="color:var(--accent-primary);">⚙️ Admin</a>
+            <?php endif; ?>
         </nav>
     </div>
 
@@ -43,6 +60,10 @@ $avatarUrl = $user['avatar_url'] ?? '/assets/default-avatar.png';
                 <div class="dropdown-menu">
                     <a href="/user/<?php echo (int)$user['id']; ?>">Profile</a>
                     <a href="/settings.php">Settings</a>
+                    <?php if ($isAdmin): ?>
+                        <div class="dropdown-divider"></div>
+                        <a href="/admin_settings.php" style="color:var(--accent-primary);">⚙️ Admin Settings</a>
+                    <?php endif; ?>
                     <div class="dropdown-divider"></div>
                     <form action="/logout.php" method="post" style="margin:0;">
                         <?php echo CSRF::getTokenInput(); ?>
