@@ -169,7 +169,7 @@ class SteamOpenID {
             return [
                 'steamId' => $steamId,
                 'username' => 'User_' . substr($steamId, -6),
-                'avatar_url' => '/assets/default-avatar.png',
+                'avatar_url' => '/assets/default-avatar.svg',
             ];
         }
         
@@ -209,7 +209,7 @@ class SteamOpenID {
         return [
             'steamId' => $steamId,
             'username' => $player['personaname'] ?? 'User_' . substr($steamId, -6),
-            'avatar_url' => $player['avatarfull'] ?? $player['avatarmedium'] ?? $player['avatar'] ?? '/assets/default-avatar.png',
+            'avatar_url' => $player['avatarfull'] ?? $player['avatarmedium'] ?? $player['avatar'] ?? '/assets/default-avatar.svg',
             'profileurl' => $player['profileurl'] ?? '',
         ];
     }

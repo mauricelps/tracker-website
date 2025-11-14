@@ -37,7 +37,7 @@ if (!$profile) {
         'steamId' => $steamId,
         'username' => 'User_' . substr($steamId, -6),
         'display_name' => 'User_' . substr($steamId, -6),
-        'avatar_url' => '/assets/default-avatar.png',
+        'avatar_url' => '/assets/default-avatar.svg',
     ];
 }
 

@@ -113,7 +113,7 @@ class SteamAPI {
      * @return string Avatar URL
      */
     public static function getAvatarUrl(array $playerData, string $size = 'full'): string {
-        $default = '/assets/default-avatar.png';
+        $default = '/assets/default-avatar.svg';
         
         if (empty($playerData)) {
             return $default;
