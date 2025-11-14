@@ -13,10 +13,12 @@ CREATE TABLE IF NOT EXISTS users (
     truckersmp_text VARCHAR(255) COMMENT 'TruckersMP ID or profile link',
     auth_token VARCHAR(255) COMMENT 'API authentication token',
     account_status ENUM('active', 'paused') DEFAULT 'active',
+    is_admin BOOLEAN DEFAULT FALSE COMMENT 'Administrator flag',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_steamid (steamId),
-    INDEX idx_status (account_status)
+    INDEX idx_status (account_status),
+    INDEX idx_admin (is_admin)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Jobs table - tracks individual delivery jobs
@@ -138,6 +140,21 @@ LEFT JOIN vtc_members vm ON v.id = vm.vtc_id AND vm.status = 'active'
 LEFT JOIN users u ON vm.user_id = u.id
 LEFT JOIN jobs j ON u.steamId = j.driver_steam_id
 GROUP BY v.id, v.name, v.tag;
+
+-- Site settings table - global application settings
+CREATE TABLE IF NOT EXISTS site_settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    setting_key VARCHAR(255) NOT NULL UNIQUE,
+    setting_value TEXT,
+    description VARCHAR(500),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_key (setting_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Insert default site settings
+INSERT INTO site_settings (setting_key, setting_value, description)
+VALUES ('registration_open', '0', 'Whether new user registration is open (1=open, 0=closed)')
+ON DUPLICATE KEY UPDATE setting_key = setting_key;
 
 -- Initial data / Sample configuration
 -- You can add default data here if needed

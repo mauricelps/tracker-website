@@ -74,7 +74,7 @@ $page_title = 'User: ' . ($user['username'] ?? 'User');
 include __DIR__ . '/includes/header.php';
 
 // default avatar
-$defaultAvatar = '/assets/default-avatar.png';
+$defaultAvatar = '/assets/default-avatar.svg';
 $avatar = $user['avatar_url'] ? $user['avatar_url'] : $defaultAvatar;
 ?>
 

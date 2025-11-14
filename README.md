@@ -86,6 +86,21 @@ A web application for tracking Euro Truck Simulator 2 and American Truck Simulat
    
    For Nginx, configure location blocks for clean URLs.
 
+7. **First User Registration (Admin Setup)**
+   
+   The first user to register will automatically become an administrator:
+   
+   a. Visit `/register.php` in your browser
+   b. Click "Register with Steam"
+   c. Complete the Steam authentication
+   d. You will be created as the first user with admin privileges
+   e. Registration will automatically close after the first user is created
+   
+   As an admin, you can:
+   - Open/close registration at `/admin_settings.php`
+   - View site statistics
+   - Reset the site (delete all data except admin accounts)
+
 ### Testing Locally
 
 #### Option 1: PHP Built-in Server (Development Only)
@@ -116,14 +131,29 @@ docker-compose up
    - Visit homepage (`/`) - should load without database errors
    - Check PHP error logs for any PDO connection errors
 
-2. **Steam Login Test**
+2. **First User Registration Test**
+   - Visit `/register.php`
+   - Click "Register with Steam"
+   - Complete Steam authentication
+   - Should be redirected back and become first admin user
+   - Verify in database: `SELECT * FROM users WHERE is_admin=1;`
+   - Verify registration closed: `SELECT * FROM site_settings WHERE setting_key='registration_open';`
+
+3. **Steam Login Test**
    - Click "Login with Steam" button
    - You'll be redirected to Steam
    - Authorize the application
-   - Should redirect back and create user account
+   - Should redirect back and create user account (if registration open) or login (if existing)
    - Check `users` table: `SELECT * FROM users;`
 
-3. **CSRF Protection Test**
+4. **Admin Settings Test**
+   - Login as admin user
+   - Navigate to Admin Settings (`/admin_settings.php`)
+   - Toggle registration (open/close)
+   - View site statistics
+   - Test reset functionality (be careful - this deletes data!)
+
+5. **CSRF Protection Test**
    - Open browser developer tools → Network tab
    - Inspect any form (Settings, Logout, etc.)
    - Verify hidden input: `<input type="hidden" name="csrf_token" value="...">`
@@ -131,13 +161,13 @@ docker-compose up
    - Try submitting form without token → Should get 403 error
    - Try submitting with invalid token → Should get 403 error
 
-4. **Theme Toggle Test**
+6. **Theme Toggle Test**
    - Click theme toggle button (top right)
    - Should switch between dark and light themes
    - Refresh page → theme should persist
    - Check localStorage: `localStorage.getItem('theme')`
 
-5. **Settings Page Test**
+7. **Settings Page Test**
    - Login and navigate to Settings (`/settings.php`)
    - Update profile fields (display name, bio, etc.)
    - Submit form → Should show success message
@@ -194,32 +224,67 @@ Before deploying to production:
 
 ### Database Tables
 
-The application expects the following tables (at minimum):
+The application uses the following tables:
 
-- `users`: User accounts (id, username, steamId, avatar_url, display_name, bio, wot_text, truckersmp_text, auth_token, account_status)
-- `jobs`: Job records
+- `users`: User accounts with Steam authentication (id, username, steamId, avatar_url, display_name, bio, is_admin, etc.)
+- `jobs`: Job records for deliveries
 - `job_transports`: Transport records (ferry/train)
-
-Optional tables for future features:
 - `vtcs`: Virtual Trucking Companies
 - `vtc_members`: VTC membership
+- `site_settings`: Global application settings (registration_open, etc.)
+
+Run `sql/schema.sql` to create all required tables with proper indexes and relationships.
 
 ## Features Implemented
+
+### Admin-First-Registration System
+
+**Features:**
+- First user to register automatically becomes admin
+- Registration automatically closes after first user
+- Admins can open/close registration
+- Admin settings page for site management
+- Site reset functionality (preserves admin accounts)
+
+**How It Works:**
+1. Fresh installation: Visit `/register.php` to create first admin account
+2. Registration automatically closes after first user
+3. Admins can toggle registration at `/admin_settings.php`
+4. Non-admins see "Registration Closed" message when trying to register
+
+**Admin Capabilities:**
+- View site statistics (total users, jobs, VTCs)
+- Open/close new user registration
+- Reset site (delete all data except admin accounts)
+- Access admin panel via navigation bar or `/admin_settings.php`
 
 ### Steam-Only Authentication
 
 **Features:**
 - Login via Steam OpenID (no passwords stored)
-- Automatic user creation on first login
+- Automatic user creation on first login (if registration open)
 - Session management with security best practices
 - Robust cURL-based validation with comprehensive error logging
+- Steam Web API integration for fetching usernames and avatars
 
 **Implementation Details:**
 - `includes/steam_openid.php` - Robust Steam OpenID validation class
-- `auth_callback.php` - Handles Steam OAuth callback
+- `includes/steam_api.php` - Steam Web API GetPlayerSummaries integration
+- `auth_callback.php` - Handles Steam OAuth callback, updates display_name when API key present
+- `register_callback.php` - Handles Steam registration callback
 - `login.php` - Initiates Steam login flow
+- `register.php` - Initiates Steam registration flow
 - Error logging for debugging authentication issues
-- Optional Steam Web API integration for profile data
+
+**Steam Web API Integration:**
+When `STEAM_API_KEY` environment variable is set:
+- User's Steam display name is fetched and stored as `display_name`
+- User's Steam avatar is fetched and stored as `avatar_url`
+- Profile data is updated on each login
+
+Without API key:
+- Users get default username like "User_123456"
+- Default avatar is used
 
 **Error Logging:**
 All Steam authentication errors are logged to PHP error log:
