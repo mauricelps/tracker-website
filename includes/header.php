@@ -43,6 +43,10 @@ $avatarUrl = $user['avatar_url'] ?? '/assets/default-avatar.png';
                 <div class="dropdown-menu">
                     <a href="/user/<?php echo (int)$user['id']; ?>">Profile</a>
                     <a href="/settings.php">Settings</a>
+                    <?php if (!empty($user['is_admin'])): ?>
+                        <div class="dropdown-divider"></div>
+                        <a href="/admin_settings.php">⚙️ Admin Settings</a>
+                    <?php endif; ?>
                     <div class="dropdown-divider"></div>
                     <form action="/logout.php" method="post" style="margin:0;">
                         <?php echo CSRF::getTokenInput(); ?>

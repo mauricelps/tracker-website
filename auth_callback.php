@@ -2,6 +2,7 @@
 // auth_callback.php - Handle Steam OpenID authentication callback
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/steam_openid.php';
+require_once __DIR__ . '/includes/steam_api.php';
 require_once __DIR__ . '/db.php';
 
 // Process the callback using robust Steam OpenID validation
@@ -14,15 +15,8 @@ if (!$steamId) {
     exit;
 }
 
-// Get Steam profile data (use environment variable for API key if available)
-$steamApiKey = getenv('STEAM_API_KEY') ?: '';
-$profile = SteamOpenID::getSteamProfile($steamId, $steamApiKey);
-
-if (!$profile) {
-    $_SESSION['login_error'] = 'Failed to retrieve Steam profile.';
-    header('Location: /login.php');
-    exit;
-}
+// Get Steam profile data using Steam API if key is available
+$profile = SteamAPI::getProfileForStorage($steamId, STEAM_API_KEY);
 
 try {
     // Check if user exists
@@ -31,25 +25,33 @@ try {
     $existingUser = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if ($existingUser) {
-        // User exists, log them in
+        // User exists, update profile from Steam API
         $userId = $existingUser['id'];
         
-        // Update last login time (optional)
-        $updateStmt = $pdo->prepare("UPDATE users SET avatar_url = :avatar WHERE id = :id");
+        // Update profile data and last_profile_update timestamp
+        $updateStmt = $pdo->prepare("
+            UPDATE users 
+            SET display_name = :display_name,
+                avatar_url = :avatar_url,
+                last_profile_update = NOW()
+            WHERE id = :id
+        ");
         $updateStmt->execute([
-            ':avatar' => $profile['avatar_url'],
+            ':display_name' => $profile['display_name'],
+            ':avatar_url' => $profile['avatar_url'],
             ':id' => $userId
         ]);
     } else {
-        // Create new user
+        // Create new user with Steam API profile data
         $insertStmt = $pdo->prepare("
-            INSERT INTO users (username, steamId, avatar_url, created_at) 
-            VALUES (:username, :steamId, :avatar, NOW())
+            INSERT INTO users (username, steamId, display_name, avatar_url, last_profile_update, created_at) 
+            VALUES (:username, :steamId, :display_name, :avatar_url, NOW(), NOW())
         ");
         $insertStmt->execute([
-            ':username' => $profile['username'],
+            ':username' => $profile['display_name'],
             ':steamId' => $steamId,
-            ':avatar' => $profile['avatar_url']
+            ':display_name' => $profile['display_name'],
+            ':avatar_url' => $profile['avatar_url']
         ]);
         $userId = $pdo->lastInsertId();
     }

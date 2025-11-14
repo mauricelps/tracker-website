@@ -13,10 +13,15 @@ CREATE TABLE IF NOT EXISTS users (
     truckersmp_text VARCHAR(255) COMMENT 'TruckersMP ID or profile link',
     auth_token VARCHAR(255) COMMENT 'API authentication token',
     account_status ENUM('active', 'paused') DEFAULT 'active',
+    is_admin TINYINT(1) DEFAULT 0 COMMENT 'Admin flag for local auth admins',
+    email VARCHAR(255) COMMENT 'Email for local admin accounts',
+    password_hash VARCHAR(255) COMMENT 'Password hash for local admin accounts',
+    last_profile_update DATETIME COMMENT 'Last time profile was updated from Steam API',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_steamid (steamId),
-    INDEX idx_status (account_status)
+    INDEX idx_status (account_status),
+    INDEX idx_admin (is_admin)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Jobs table - tracks individual delivery jobs
@@ -139,6 +144,15 @@ LEFT JOIN users u ON vm.user_id = u.id
 LEFT JOIN jobs j ON u.steamId = j.driver_steam_id
 GROUP BY v.id, v.name, v.tag;
 
+-- Site Settings table - for application-wide configuration
+CREATE TABLE IF NOT EXISTS site_settings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    `key` VARCHAR(128) NOT NULL UNIQUE,
+    `value` TEXT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_key (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Initial data / Sample configuration
 -- You can add default data here if needed
 
@@ -146,6 +160,10 @@ GROUP BY v.id, v.name, v.tag;
 -- INSERT INTO vtcs (name, tag, description, owner_user_id, status) 
 -- VALUES ('Independent Drivers', 'IND', 'Default group for independent drivers', 1, 'active')
 -- ON DUPLICATE KEY UPDATE name = name;
+
+-- Set default site settings
+INSERT INTO site_settings (`key`, `value`) VALUES ('registration_open', '0') 
+ON DUPLICATE KEY UPDATE `value` = `value`;
 
 -- Database schema version tracking (optional but recommended)
 CREATE TABLE IF NOT EXISTS schema_versions (
@@ -156,5 +174,13 @@ CREATE TABLE IF NOT EXISTS schema_versions (
 
 -- Record this schema version
 INSERT INTO schema_versions (version, description) 
-VALUES (1, 'Initial schema with users, jobs, VTCs, and statistics views')
+VALUES (2, 'Added admin support, site_settings table, and Steam API profile update tracking')
 ON DUPLICATE KEY UPDATE applied_at = CURRENT_TIMESTAMP;
+
+-- Migration notes for existing databases:
+-- If upgrading from version 1, run these ALTER statements:
+-- ALTER TABLE users ADD COLUMN is_admin TINYINT(1) DEFAULT 0 COMMENT 'Admin flag for local auth admins';
+-- ALTER TABLE users ADD COLUMN email VARCHAR(255) COMMENT 'Email for local admin accounts';
+-- ALTER TABLE users ADD COLUMN password_hash VARCHAR(255) COMMENT 'Password hash for local admin accounts';
+-- ALTER TABLE users ADD COLUMN last_profile_update DATETIME COMMENT 'Last time profile was updated from Steam API';
+-- ALTER TABLE users ADD INDEX idx_admin (is_admin);

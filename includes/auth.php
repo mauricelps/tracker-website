@@ -29,7 +29,7 @@ function current_user(): ?array {
     }
 
     try {
-        $stmt = $pdo->prepare("SELECT id, username, steamId, avatar_url FROM users WHERE id = :id LIMIT 1");
+        $stmt = $pdo->prepare("SELECT id, username, steamId, avatar_url, is_admin FROM users WHERE id = :id LIMIT 1");
         $stmt->bindValue(':id', (int)$_SESSION['user_id'], PDO::PARAM_INT);
         $stmt->execute();
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -41,6 +41,18 @@ function current_user(): ?array {
         // Log the error to PHP error log for debugging (do NOT echo to users)
         error_log('current_user() DB error: ' . $e->getMessage());
         return null;
+    }
+}
+
+function is_admin(): bool {
+    $user = current_user();
+    return $user && !empty($user['is_admin']);
+}
+
+function require_admin(): void {
+    if (!is_admin()) {
+        http_response_code(403);
+        die('Access denied. Admin privileges required.');
     }
 }
 
