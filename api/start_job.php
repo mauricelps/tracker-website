@@ -19,8 +19,8 @@ foreach ($required_fields as $field) {
     }
 }
 
-$sql = "INSERT INTO jobs (game, driver_steam_id, truck, cargo, source_city, source_company, destination_city, destination_company, planned_distance_km, start_time, status, truckLicensePlate, truckLPlateCountry, trailerLicensePlate, trailerLPlateCountry, truckLPlateCountryId, trailerLPlateCountryId) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'STARTED', ?, ?, ?, ?, ?, ?)";
+$sql = "INSERT INTO jobs (game, driver_steam_id, truck, cargo, source_city, source_company, destination_city, destination_company, planned_distance_km, start_time, status, truckLicensePlate, truckLPlateCountry, trailerLicensePlate, trailerLPlateCountry, truckLPlateCountryId, trailerLPlateCountryId, truckLPlateCountryIdBase, trailerLPlateCountryIdBase) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Started', ?, ?, ?, ?, ?, ?, ?, ?)";
 
 try {
     $stmt = $pdo->prepare($sql);
@@ -39,7 +39,9 @@ try {
 		$data['trailerLicensePlate'],
 		$data['trailerLicensePlateCountry'],
 		getLicensePlateCode($data['truckLicensePlateCountryId']),
-		getLicensePlateCode($data['trailerLicensePlateCountryId'])
+		getLicensePlateCode($data['trailerLicensePlateCountryId']),
+		$data['truckLicensePlateCountryId'],
+		$data['trailerLicensePlateCountryId']
     ]);
 
     $jobId = $pdo->lastInsertId();
@@ -66,7 +68,7 @@ function getLicensePlateCode(string $countryId): string {
         'poland' => 'PL',
         'slovakia' => 'SK',
         'switzerland' => 'CH',
-        'united_kingdom' => 'GB',
+        'uk' => 'GB',
         
         // Going East! DLC
         'estonia' => 'EST',

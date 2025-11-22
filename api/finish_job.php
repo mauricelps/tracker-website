@@ -14,7 +14,7 @@ if ($data === null) {
 }
 
 // --- SCHRITT 2: DATEN VALIDIEREN (unverändert) ---
-$required_fields = ['jobid', 'steamid', 'status', 'driven_km', 'market', 'income', 'wearTruckCabin', 'wearTruckChassis', 'wearTruckTransmission', 'wearTruckWheels', 'wearTrailerChassis', 'wearTrailerWheels', 'wearTrailerBody', 'cargoDamage', 'cargoMass', 'wearTruckEngine', 'maxspeed', 'xp'];
+$required_fields = ['jobid', 'steamid', 'status', 'driven_km', 'market', 'income', 'wearTruckCabin', 'wearTruckChassis', 'wearTruckTransmission', 'wearTruckWheels', 'wearTrailerChassis', 'wearTrailerWheels', 'wearTrailerBody', 'cargoDamage', 'cargoMass', 'wearTruckEngine', 'maxspeed', 'xp', 'autoLoad', 'autoPark', 'usedDiesel'];
 foreach ($required_fields as $field) {
     if (!array_key_exists($field, $data)) {
         http_response_code(400);
@@ -42,6 +42,9 @@ $cargoDamage = $data['cargoDamage'];
 $cargoMass = $data['cargoMass'];
 $maxSpeed = $data['maxspeed'];
 $xp = $data['xp'];
+$autoPark = $data['autoPark'];
+$autoLoad = $data['autoLoad'];
+$usedDiesel = $data['usedDiesel'];
 
 // --- Berechnungen (unverändert) ---
 $wearTruck = [$wearTruckCabin, $wearTruckChassis, $wearTruckTransmission, $wearTruckWheels, $wearTruckEngine];
@@ -70,19 +73,38 @@ try {
                 wear_truck_wheels = ?,
                 cargoDamage = ?,
                 cargoMass = ?,
-                maxSpeed = ?
+                maxSpeed = ?,
+                xp = ?,
+				autoParkUsed = ?,
+				autoLoadUsed = ?,
+				usedDiesel = ?
             WHERE 
                 id = ? AND driver_steam_id = ?";
 
     $stmt = $pdo->prepare($sql);
 
-    // KORREKTUR: PDO verwendet execute() mit einem Array, nicht bind_param().
     $success = $stmt->execute([
-        $job_status, $driven_km, $income, $market, 
-        $wearTrailerBody, $wearTrailerChassis, $wearTrailerWheels, 
-        $wearTruckCabin, $wearTruckChassis, $wearTruckEngine, $wearTruckTransmission, $wearTruckWheels,
-        $cargoDamage, $cargoMass, $maxSpeed, 
-        $job_id, $steam_id
+        $job_status,
+        $driven_km,
+        $income,
+        $market,
+        $wearTrailerBody,
+        $wearTrailerChassis,
+        $wearTrailerWheels,
+        $wearTruckCabin,
+        $wearTruckChassis,
+        $wearTruckEngine,
+        $wearTruckTransmission,
+        $wearTruckWheels,
+        $cargoDamage,
+        $cargoMass,
+        $maxSpeed,
+        $xp,               // <- xp jetzt gesetzt
+		$autoPark,
+		$autoLoad,
+		$usedDiesel,
+        $job_id,
+        $steam_id
     ]);
 
     // KORREKTUR: Die Anzahl der betroffenen Zeilen wird mit rowCount() ermittelt.
