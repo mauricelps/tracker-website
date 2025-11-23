@@ -1,20 +1,6 @@
 <?php
-// record_penalty.php
+// record_penalty.php (record_fine.php)
 // API endpoint to record penalties ("Strafen")
-//
-// Expected inputs (POST JSON or form-data):
-//   - game   (string)    required
-//   - amount (double)    required
-//   - offence (string)   required
-//   - jobId  (int)       required
-//   - steamId / steamid (string/long) required
-// Auth:
-//   - Authorization: Bearer <auth_token>
-//   - or X-Auth-Token header
-//   - or POST field auth_token
-//
-// Requires a db.php in same project root that provides $pdo (PDO).
-// Uses prepared statements and returns JSON responses with proper HTTP codes.
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -24,10 +10,19 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-require_once __DIR__ . '../db.php';
+// fix path to db.php
+require_once __DIR__ . '/../db.php';
+
+// sanity check for $pdo
+if (!isset($pdo) || !($pdo instanceof PDO)) {
+    http_response_code(500);
+    error_log('record_fine.php: $pdo not available after require');
+    echo json_encode(['success' => false, 'error' => 'Server configuration error (database).']);
+    exit;
+}
 
 $input = [];
-$contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+$contentType = $_SERVER['CONTENT_TYPE'] ?? ($_SERVER['HTTP_CONTENT_TYPE'] ?? '');
 if (stripos($contentType, 'application/json') !== false) {
     $raw = file_get_contents('php://input');
     $decoded = json_decode($raw, true);
@@ -112,8 +107,8 @@ try {
     $gameStr = mb_substr($game, 0, 100);
     $offenceStr = mb_substr($offence, 0, 255);
 
-    // verify job exists and belongs to user
-    $j = $pdo->prepare('SELECT id, user_id FROM jobs WHERE id = ? LIMIT 1');
+    // verify job exists and belongs to user (robust check: user_id or driver_steam_id)
+    $j = $pdo->prepare('SELECT id, user_id, driver_steam_id FROM jobs WHERE id = ? LIMIT 1');
     $j->execute([$jobIdInt]);
     $job = $j->fetch(PDO::FETCH_ASSOC);
     if (!$job) {
@@ -121,13 +116,22 @@ try {
         echo json_encode(['success' => false, 'error' => 'Job not found']);
         exit;
     }
-    if ((int)$job['user_id'] !== $userId) {
-        http_response_code(403);
-        echo json_encode(['success' => false, 'error' => 'Job does not belong to authenticated user']);
-        exit;
+    if (isset($job['user_id']) && $job['user_id'] !== null) {
+        if ((int)$job['user_id'] !== $userId) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Job does not belong to authenticated user']);
+            exit;
+        }
+    } else {
+        $driverSteam = (string)($job['driver_steam_id'] ?? '');
+        if ($driverSteam === '' || $driverSteam !== $steamId) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Job does not belong to authenticated user (steamId mismatch)']);
+            exit;
+        }
     }
 
-    // insert penalty
+    // insert penalty (table name used previously: penalties)
     $ins = $pdo->prepare('INSERT INTO penalties (job_id, user_id, game, amount, offence, created_at) VALUES (?, ?, ?, ?, ?, ?)');
     $now = date('Y-m-d H:i:s');
     $ins->execute([$jobIdInt, $userId, $gameStr, $amountVal, $offenceStr, $now]);
@@ -146,4 +150,10 @@ try {
     error_log('record_penalty.php error: ' . $e->getMessage());
     echo json_encode(['success' => false, 'error' => 'Server error']);
     exit;
+} catch (Throwable $e) {
+    http_response_code(500);
+    error_log('record_penalty.php throwable: ' . $e->getMessage());
+    echo json_encode(['success' => false, 'error' => 'Server error']);
+    exit;
 }
+?>
