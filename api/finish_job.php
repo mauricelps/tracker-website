@@ -1,10 +1,7 @@
 <?php
-
 header('Content-Type: application/json');
 
-// --- SCHRITT 1: DATEN AUSLESEN (unverändert) ---
 $json_str = file_get_contents('php://input');
-file_put_contents('debug_log.txt', "--- FINISH JOB REQUEST ---\n" . $json_str . "\n\n", FILE_APPEND);
 $data = json_decode($json_str, true);
 
 if ($data === null) {
@@ -14,7 +11,7 @@ if ($data === null) {
 }
 
 // --- SCHRITT 2: DATEN VALIDIEREN (unverändert) ---
-$required_fields = ['jobid', 'steamid', 'status', 'driven_km', 'market', 'income', 'wearTruckCabin', 'wearTruckChassis', 'wearTruckTransmission', 'wearTruckWheels', 'wearTrailerChassis', 'wearTrailerWheels', 'wearTrailerBody', 'cargoDamage', 'cargoMass', 'wearTruckEngine', 'maxspeed', 'xp', 'autoLoad', 'autoPark', 'usedDiesel'];
+$required_fields = ['jobid', 'userid', 'status', 'driven_km', 'market', 'income', 'wearTruckCabin', 'wearTruckChassis', 'wearTruckTransmission', 'wearTruckWheels', 'wearTrailerChassis', 'wearTrailerWheels', 'wearTrailerBody', 'cargoDamage', 'cargoMass', 'wearTruckEngine', 'maxspeed', 'xp', 'autoLoad', 'autoPark', 'usedDiesel', 'usedAdblue'];
 foreach ($required_fields as $field) {
     if (!array_key_exists($field, $data)) {
         http_response_code(400);
@@ -25,7 +22,7 @@ foreach ($required_fields as $field) {
 
 // --- Daten in Variablen speichern (unverändert) ---
 $job_id = $data['jobid'];
-$steam_id = $data['steamid'];
+$steam_id = $data['userid'];
 $job_status = $data['status'];
 $driven_km = $data['driven_km'];
 $income = $data['income'];
@@ -45,6 +42,7 @@ $xp = $data['xp'];
 $autoPark = $data['autoPark'];
 $autoLoad = $data['autoLoad'];
 $usedDiesel = $data['usedDiesel'];
+$usedAdblue = $data['usedAdblue'];
 
 // --- Berechnungen (unverändert) ---
 $wearTruck = [$wearTruckCabin, $wearTruckChassis, $wearTruckTransmission, $wearTruckWheels, $wearTruckEngine];
@@ -57,7 +55,7 @@ require_once '../db.php'; // Stellt die $pdo Variable bereit
 
 try {
     // --- SCHRITT 4: JOB AKTUALISIEREN (JETZT KORREKTER PDO-CODE) ---
-    $sql = "UPDATE jobs SET 
+    $sql = "UPDATE tracker_jobs SET 
                 status = ?, 
                 driven_distance_km = ?, 
                 end_time = NOW(),
@@ -77,7 +75,8 @@ try {
                 xp = ?,
 				autoParkUsed = ?,
 				autoLoadUsed = ?,
-				usedDiesel = ?
+				usedDiesel = ?,
+				usedAdblue = ?
             WHERE 
                 id = ? AND driver_steam_id = ?";
 
@@ -103,6 +102,7 @@ try {
 		$autoPark,
 		$autoLoad,
 		$usedDiesel,
+		$usedAdblue,
         $job_id,
         $steam_id
     ]);
@@ -112,57 +112,24 @@ try {
         http_response_code(200);
         echo json_encode(['success' => true, 'message' => 'Job ' . $job_id . ' updated successfully.']);
 
-        // --- DATEN FÜR WEBHOOK ABFRAGEN (JETZT KORREKTER PDO-CODE) ---
-        $query_job_data = $pdo->prepare("
-            SELECT 
-                j.*, u.username, 
-                TIMESTAMPDIFF(SECOND, j.start_time, j.end_time) as duration_seconds
-            FROM jobs j
-            JOIN users u ON j.driver_steam_id = u.steamId
-            WHERE j.id = ?
-        ");
-        
-        $query_job_data->execute([$job_id]);
-        // KORREKTUR: Das Ergebnis wird mit fetch() geholt, nicht mit get_result().
-        $job_data = $query_job_data->fetch(PDO::FETCH_ASSOC);
+        // --- WEBSOCKET-NOTIFY: jobId an konfigurierbare IP:PORT senden (neu) ---
+        // Konfiguration anpassen: Zielhost, Port und Pfad (falls nötig)
+        $ws_host = '88.198.12.152';   // <-- Ziel-IP hier anpassen
+        $ws_port = 9996;          // <-- Ziel-Port hier anpassen
+        $ws_path = '/';           // <-- WebSocket-Pfad, z.B. '/ws' falls benötigt
 
-        if ($job_data) {
-            // --- DISCORD WEBHOOK LOGIK (unverändert, sollte jetzt funktionieren) ---
-            $whurl = "https://discord.com/api/webhooks/1434216294810648838/MjMc_m-nzLG4P_4IXJLFMkdV0wvyfdNPloYpTHH70oKrQIWeJmKdG4AEt6ioFTddMMlF";
-            $title = "Job " . ucfirst($job_status);
+        $payload = json_encode(['jobId' => $job_id]);
 
-            $hookObj = json_encode([
-                "username" => "JobTracker", "avatar_url" => "https://gtracker.kitsoft.at/data/avatar.png",
-                "embeds" => [
-                    [
-                        "title" => $title, "type" => "rich", "color" => hexdec("FFEF00"),
-                        "author" => ["name" => $job_data['username']],
-                        "description" => "**From - To** \n " . $job_data['source_city'] . " (" . $job_data['source_company'] . ") - " . $job_data['destination_city'] . " (" . $job_data['destination_company'] . ")",
-                        "fields" => [
-                            ["name" => "Game", "value" => translateGame($job_data['game']), "inline" => true],
-                            ["name" => "Cargo", "value" => $job_data['cargo'] . " (" . ($job_data['cargoMass'] / 1000) . " t)", "inline" => false],
-                            ["name" => "Experience", "value" => $xp . " XP", "inline" => true],
-							["name" => "Distance", "value" => round($driven_km, 2) . " km", "inline" => true],
-                            ["name" => "IRL Time Duration", "value" => formatDuration($job_data['duration_seconds']), "inline" => true],
-                            ["name" => "Income", "value" => number_format($income) . " €", "inline" => true],
-                            ["name" => "Damage", "value" => "Truck: " . number_format($avgTruckWear * 100, 2) . " % \nTrailer: " . number_format($avgTrailerWear * 100, 2) . " % \nCargo: " . number_format($cargoDamage, 2) . " %", "inline" => true],
-                            ["name" => "Truck & Trailer", "value" => "Truck: " . $job_data['truck'] . ", " . $job_data['truckLPlateCountryId'] . " " . $job_data['truckLicensePlate'] . "\nTrailer: " . translateTrailerBody($job_data['trailerBodyType']) . ", " .$job_data['trailerLPlateCountryId'] . " " . $job_data['trailerLicensePlate'], "inline" => true]
-                        ]
-                    ]
-                ]
-            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-
-            $ch = curl_init();
-            curl_setopt_array($ch, [CURLOPT_URL => $whurl, CURLOPT_POST => true, CURLOPT_POSTFIELDS => $hookObj, CURLOPT_HTTPHEADER => ["Content-Type: application/json"]]);
-            curl_exec($ch);
-            curl_close($ch);
+        // Non-blocking send: Fehler werden geloggt, aber die API-Antwort bleibt erfolgreich
+        try {
+            $sent = ws_send($ws_host, (int)$ws_port, $ws_path, $payload, 2.0);
+            if (!$sent) {
+                error_log("finish_job.php: WebSocket notify failed for job {$job_id} to {$ws_host}:{$ws_port}");
+            }
+        } catch (Throwable $t) {
+            error_log("finish_job.php: WebSocket exception: " . $t->getMessage());
         }
-
-    } else {
-        http_response_code(404);
-        echo json_encode(['success' => false, 'message' => 'Job not found or user does not match.']);
     }
-
 } catch (PDOException $e) {
     // Fängt alle PDO-bezogenen Fehler ab und gibt eine saubere Fehlermeldung aus.
     http_response_code(500);
@@ -189,5 +156,79 @@ function translateTrailerBody(string $trlbdy): string {
 		"curtainsider" => "Curtainsider",
 		default => $trlbdy . "_def"
 	};
+}
+
+function ws_send(string $host, int $port, string $path, string $payload, float $timeout = 3.0): bool {
+    $errNo = 0; $errStr = '';
+    $fp = @stream_socket_client("tcp://{$host}:{$port}", $errNo, $errStr, $timeout);
+    if (!$fp) {
+        error_log("ws_send: connection failed: $errNo $errStr");
+        return false;
+    }
+
+    // Create Sec-WebSocket-Key
+    try {
+        $key = base64_encode(random_bytes(16));
+    } catch (Throwable $t) {
+        $key = base64_encode(uniqid('', true));
+    }
+
+    $headers = "GET {$path} HTTP/1.1\r\n" .
+               "Host: {$host}:{$port}\r\n" .
+               "Upgrade: websocket\r\n" .
+               "Connection: Upgrade\r\n" .
+               "Sec-WebSocket-Key: {$key}\r\n" .
+               "Sec-WebSocket-Version: 13\r\n" .
+               "\r\n";
+
+    stream_set_timeout($fp, (int)$timeout);
+    fwrite($fp, $headers);
+
+    // Read response (simple check, don't require full validation)
+    $response = fread($fp, 1024);
+    if ($response === false || stripos($response, '101') === false) {
+        // still proceed in some environments, but log
+        error_log("ws_send: handshake response invalid or missing for {$host}:{$port} - resp: " . substr($response ?? '', 0, 200));
+        // optionally return false here if strict
+    }
+
+    // Build a masked text frame (client MUST mask)
+    $data = (string)$payload;
+    $len = strlen($data);
+    $frameHead = '';
+    $b1 = 0x81; // FIN + text opcode
+    $frameHead .= chr($b1);
+
+    if ($len <= 125) {
+        $frameHead .= chr(0x80 | $len); // mask bit set + length
+    } elseif ($len <= 0xFFFF) {
+        $frameHead .= chr(0x80 | 126) . pack('n', $len);
+    } else {
+        // 64bit length
+        $frameHead .= chr(0x80 | 127) . pack('J', $len);
+    }
+
+    // generate mask
+    try {
+        $mask = random_bytes(4);
+    } catch (Throwable $t) {
+        $mask = substr(md5(uniqid((string)microtime(true), true), true), 0, 4);
+    }
+
+    $frame = $frameHead . $mask;
+
+    // mask payload
+    $maskedPayload = '';
+    for ($i = 0; $i < $len; $i++) {
+        $maskedPayload .= $data[$i] ^ $mask[$i % 4];
+    }
+
+    fwrite($fp, $frame . $maskedPayload);
+
+    // give server a short time to receive
+    usleep(150000);
+
+    fclose($fp);
+    return true;
 }
 ?>

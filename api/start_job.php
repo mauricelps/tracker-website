@@ -10,7 +10,7 @@ $json_data = file_get_contents('php://input');
 $data = json_decode($json_data, true);
 
 // Überprüfen, ob alle notwendigen Daten vorhanden sind
-$required_fields = ['game', 'driverSteamId', 'truck', 'cargo', 'sourceCity', 'sourceCompany', 'destinationCity', 'destinationCompany', 'plannedDistanceKm', 'truckLicensePlate', 'truckLicensePlateCountry', 'trailerLicensePlate', 'trailerLicensePlateCountry', 'truckLicensePlateCountryId', 'trailerLicensePlateCountryId'];
+$required_fields = ['game', 'userid', 'truck', 'cargo', 'sourceCity', 'sourceCompany', 'destinationCity', 'destinationCompany', 'plannedDistanceKm', 'truckLicensePlate', 'truckLicensePlateCountry', 'trailerLicensePlate', 'trailerLicensePlateCountry', 'truckLicensePlateCountryId', 'trailerLicensePlateCountryId'];
 foreach ($required_fields as $field) {
     if (empty($data[$field])) {
         http_response_code(400);
@@ -19,14 +19,14 @@ foreach ($required_fields as $field) {
     }
 }
 
-$sql = "INSERT INTO jobs (game, driver_steam_id, truck, cargo, source_city, source_company, destination_city, destination_company, planned_distance_km, start_time, status, truckLicensePlate, truckLPlateCountry, trailerLicensePlate, trailerLPlateCountry, truckLPlateCountryId, trailerLPlateCountryId, truckLPlateCountryIdBase, trailerLPlateCountryIdBase) 
+$sql = "INSERT INTO tracker_jobs (game, driver_steam_id, truck, cargo, source_city, source_company, destination_city, destination_company, planned_distance_km, start_time, status, truckLicensePlate, truckLPlateCountry, trailerLicensePlate, trailerLPlateCountry, truckLPlateCountryId, trailerLPlateCountryId, truckLPlateCountryIdBase, trailerLPlateCountryIdBase) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'Started', ?, ?, ?, ?, ?, ?, ?, ?)";
 
 try {
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
         $data['game'],
-        $data['driverSteamId'],
+        $data['userid'],
         $data['truck'],
         $data['cargo'],
         $data['sourceCity'],

@@ -10,7 +10,7 @@ if ($data === null) {
     exit();
 }
 
-$required_fields = ['jobId', 'steamid', 'transportType', 'source', 'destination', 'game', 'amount'];
+$required_fields = ['jobId', 'userid', 'transportType', 'source', 'destination', 'game', 'amount'];
 foreach ($required_fields as $field) {
     if (!array_key_exists($field, $data)) {
         http_response_code(400);
@@ -20,7 +20,7 @@ foreach ($required_fields as $field) {
 }
 
 $job_id = $data['jobId'];
-$steam_id = $data['steamid'];
+$steam_id = $data['userid'];
 $transport_type = $data['transportType'];
 $source_name = $data['source'];
 $destination_name = $data['destination'];
@@ -30,7 +30,7 @@ $amount = (int)$data['amount'];
 require_once '../db.php';
 
 try {
-    $check_sql = "SELECT id FROM jobs WHERE id = ? AND driver_steam_id = ?";
+    $check_sql = "SELECT id FROM tracker_jobs WHERE id = ? AND driver_steam_id = ?";
     $check_stmt = $pdo->prepare($check_sql);
     $check_stmt->execute([$job_id, $steam_id]);
 
@@ -40,7 +40,7 @@ try {
         exit();
     }
 
-    $sql = "INSERT INTO job_transports 
+    $sql = "INSERT INTO tracker_transports 
                 (job_id, transport_type, source_name, destination_name, timestamp, game, amount, drv_steam_id) 
             VALUES 
                 (?, ?, ?, ?, NOW(), ?, ?, ?)";
