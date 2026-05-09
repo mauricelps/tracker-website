@@ -2,7 +2,19 @@
 require_once 'db.php';
 
 try {
-    $stmt = $pdo->query("SELECT name, xp, level, km, jobs FROM core_users ORDER BY xp DESC");
+    $stmt = $pdo->query("
+        SELECT 
+            cu.id,
+            cu.name,
+            cu.level,
+            COALESCE(SUM(tj.driven_distance_km), 0) as km,
+            COALESCE(SUM(tj.xp), 0) as xp,
+            COUNT(tj.id) as jobs
+        FROM core_users cu
+        LEFT JOIN tracker_jobs tj ON cu.id = tj.driver_steam_id
+        GROUP BY cu.id, cu.name, cu.level
+        ORDER BY xp DESC
+    ");
     $drivers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Datenbankfehler: " . $e->getMessage());
