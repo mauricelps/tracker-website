@@ -6,26 +6,34 @@ $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
 $page = max(1, $page);
 $offset = ($page - 1) * $per_page;
 
+// Mapping für Game-Übersetzung
+$game_names = [
+    'ats' => 'American Truck Simulator',
+    'eut2' => 'Euro Truck Simulator 2'
+];
+
 try {
     // Gesamtanzahl Jobs
     $stmt = $pdo->query("SELECT COUNT(*) as total FROM tracker_jobs");
     $total_jobs = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
     $total_pages = ceil($total_jobs / $per_page);
     
-    // Jobs für aktuelle Seite
+    // Jobs für aktuelle Seite mit Fahrernamen
     $stmt = $pdo->prepare("
         SELECT 
-            id,
-            game,
-            driver_steam_id,
-            truck,
-            cargo,
-            source_city,
-            source_company,
-            destination_city,
-            destination_company
-        FROM tracker_jobs
-        ORDER BY id DESC
+            tj.id,
+            tj.game,
+            tj.driver_steam_id,
+            COALESCE(cu.name, 'Unbekannt') as driver_name,
+            tj.truck,
+            tj.cargo,
+            tj.source_city,
+            tj.source_company,
+            tj.destination_city,
+            tj.destination_company
+        FROM tracker_jobs tj
+        LEFT JOIN core_users cu ON tj.driver_steam_id = cu.id
+        ORDER BY tj.id DESC
         LIMIT :limit OFFSET :offset
     ");
     $stmt->bindValue(':limit', $per_page, PDO::PARAM_INT);
@@ -66,7 +74,7 @@ try {
                 <tr>
                     <th>ID</th>
                     <th>Game</th>
-                    <th>Fahrer Steam ID</th>
+                    <th>Fahrer</th>
                     <th>Truck</th>
                     <th>Fracht</th>
                     <th>Von</th>
@@ -78,8 +86,8 @@ try {
                 <?php foreach ($jobs as $job): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($job['id']); ?></td>
-                    <td><?php echo htmlspecialchars($job['game']); ?></td>
-                    <td><?php echo htmlspecialchars($job['driver_steam_id']); ?></td>
+                    <td><?php echo htmlspecialchars($game_names[$job['game']] ?? $job['game']); ?></td>
+                    <td><?php echo htmlspecialchars($job['driver_name']); ?></td>
                     <td><?php echo htmlspecialchars($job['truck']); ?></td>
                     <td><?php echo htmlspecialchars($job['cargo']); ?></td>
                     <td>
