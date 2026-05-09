@@ -118,7 +118,7 @@ try {
         $ws_port = 9996;          // <-- Ziel-Port hier anpassen
         $ws_path = '/';           // <-- WebSocket-Pfad, z.B. '/ws' falls benötigt
 
-        $payload = json_encode(['jobId' => $job_id]);
+        $payload = json_encode(['jobId' => $job_id, 'token' => "SQh4VWjY8Py7Dl8QZU7ljJkmxul4sdr2V3k2ThCx0jWItF7Xwak27ocppFBA1zBz8oggyoHoGv1R4ODkABPfAH9WyRGVy7XjqE3JlhDI2YKbFYdvLg9Bjmhgge104hwi", 'mode' => "finishJob"]);
 
         // Non-blocking send: Fehler werden geloggt, aber die API-Antwort bleibt erfolgreich
         try {

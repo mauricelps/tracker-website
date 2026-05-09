@@ -1,0 +1,36 @@
+--- FINISH JOB REQUEST ---
+{"status":"Cancelled","driven_km":3.203125,"userid":3,"income":0,"market":"quick_job","jobid":1,"xp":0,"wearTruckCabin":0.0,"wearTruckChassis":0.0,"wearTruckEngine":7.08499419488362E-6,"wearTruckTransmission":7.08499419488362E-6,"wearTruckWheels":7.084993558237329E-5,"wearTrailerChassis":0.0,"wearTrailerWheels":6.60001314827241E-5,"wearTrailerBody":0.0,"cargoDamage":0.0,"cargoMass":14165,"maxspeed":57,"autoLoad":0,"autoPark":0,"usedDiesel":2.06}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":269813.22265625,"userid":3,"income":465,"market":"quick_job","jobid":2,"xp":103,"wearTruckCabin":0.0,"wearTruckChassis":0.0,"wearTruckEngine":2.8135546017438173E-5,"wearTruckTransmission":2.8135546017438173E-5,"wearTruckWheels":2.813554310705513E-4,"wearTrailerChassis":0.0,"wearTrailerWheels":2.200012095272541E-4,"wearTrailerBody":0.0,"cargoDamage":0.0,"cargoMass":26500,"maxspeed":69,"autoLoad":1,"autoPark":0,"usedDiesel":8.64}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":34.625,"userid":3,"income":387,"market":"quick_job","jobid":3,"xp":55,"wearTruckCabin":4.0584945236332715E-4,"wearTruckChassis":5.073118372820318E-4,"wearTruckEngine":9.9966797279194E-5,"wearTruckTransmission":9.9966797279194E-5,"wearTruckWheels":0.0010769726941362023,"wearTrailerChassis":0.0018980131717398763,"wearTrailerWheels":0.0010372340911999345,"wearTrailerBody":0.0015184106305241585,"cargoDamage":5.4346844990504906E-5,"cargoMass":780,"maxspeed":96,"autoLoad":1,"autoPark":0,"usedDiesel":0.0}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":3.3125,"userid":3,"income":448,"market":"quick_job","jobid":5,"xp":18,"wearTruckCabin":1.7473955722380197E-6,"wearTruckChassis":2.184244294767268E-6,"wearTruckEngine":9.40427344175987E-6,"wearTruckTransmission":9.40427344175987E-6,"wearTruckWheels":9.437557309865952E-5,"wearTrailerChassis":7.664622899028473E-6,"wearTrailerWheels":6.716807547491044E-5,"wearTrailerBody":6.131698228273308E-6,"cargoDamage":4.379828624223592E-7,"cargoMass":18741,"maxspeed":54,"autoLoad":1,"autoPark":0,"usedDiesel":1.94}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":87.1875,"userid":3,"income":959,"market":"quick_job","jobid":6,"xp":159,"wearTruckCabin":0.0020545818842947483,"wearTruckChassis":0.0025682272389531136,"wearTruckEngine":2.098461554851383E-4,"wearTruckTransmission":2.098461554851383E-4,"wearTruckWheels":0.0024898105766624212,"wearTrailerChassis":4.6851643128320575E-4,"wearTrailerWheels":0.001963475253432989,"wearTrailerBody":3.748131566680968E-4,"cargoDamage":2.2325164172798395E-4,"cargoMass":3500,"maxspeed":92,"autoLoad":1,"autoPark":0,"usedDiesel":26.18}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":13.875,"userid":3,"income":2414,"market":"quick_job","jobid":8,"xp":172,"wearTruckCabin":0.06772127002477646,"wearTruckChassis":0.08465157449245453,"wearTruckEngine":0.022256677970290184,"wearTruckTransmission":0.013357602059841156,"wearTruckWheels":0.015108142048120499,"wearTrailerChassis":0.013914267532527447,"wearTrailerWheels":0.003924346528947353,"wearTrailerBody":0.011131413280963898,"cargoDamage":0.005353547167032957,"cargoMass":15352,"maxspeed":69,"autoLoad":1,"autoPark":0,"usedDiesel":10.12,"usedAdblue":0.51}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":198.6875,"userid":3,"income":642,"market":"quick_job","jobid":9,"xp":252,"wearTruckCabin":1.1651556997094303E-4,"wearTruckChassis":1.456444733776152E-4,"wearTruckEngine":4.64724435005337E-4,"wearTruckTransmission":4.64724435005337E-4,"wearTruckWheels":0.004669436253607273,"wearTrailerChassis":6.826486787758768E-4,"wearTrailerWheels":0.004460455849766731,"wearTrailerBody":5.461190012283623E-4,"cargoDamage":1.9525243260432035E-5,"cargoMass":1040,"maxspeed":102,"autoLoad":1,"autoPark":0,"usedDiesel":85.54,"usedAdblue":5.13}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":387.875,"userid":3,"income":9631,"market":"quick_job","jobid":10,"xp":352,"wearTruckCabin":0.5515758991241455,"wearTruckChassis":0.689470112323761,"wearTruckEngine":0.27686116099357605,"wearTruckTransmission":0.16550283133983612,"wearTruckWheels":0.11616159975528717,"wearTrailerChassis":0.1811908334493637,"wearTrailerWheels":0.03612568974494934,"wearTrailerBody":0.14495258033275604,"cargoDamage":0.05291464179754257,"cargoMass":17941,"maxspeed":138,"autoLoad":1,"autoPark":0,"usedDiesel":233.77,"usedAdblue":11.69}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":104.8798828125,"userid":3,"income":6220,"market":"cargo_market","jobid":12,"xp":181,"wearTruckCabin":0.1051502674818039,"wearTruckChassis":0.13143783807754517,"wearTruckEngine":0.05375092849135399,"wearTruckTransmission":0.03165949881076813,"wearTruckWheels":0.041249021887779236,"wearTrailerChassis":0.028929464519023895,"wearTrailerWheels":0.024690868332982063,"wearTrailerBody":0.023143569007515907,"cargoDamage":0.0029396838508546352,"cargoMass":19693,"maxspeed":89,"autoLoad":0,"autoPark":0,"usedDiesel":69.31,"usedAdblue":3.47}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":104.8798828125,"userid":3,"income":6220,"market":"cargo_market","jobid":11,"xp":181,"wearTruckCabin":0.1051502674818039,"wearTruckChassis":0.13143783807754517,"wearTruckEngine":0.05375092849135399,"wearTruckTransmission":0.03165949881076813,"wearTruckWheels":0.041249021887779236,"wearTrailerChassis":0.028929464519023895,"wearTrailerWheels":0.024690868332982063,"wearTrailerBody":0.023143569007515907,"cargoDamage":0.0029396838508546352,"cargoMass":19693,"maxspeed":89,"autoLoad":0,"autoPark":0,"usedDiesel":69.31,"usedAdblue":3.47}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":1050.962890625,"userid":3,"income":46704,"market":"external_market","jobid":13,"xp":1345,"wearTruckCabin":0.12144465744495392,"wearTruckChassis":0.1518058180809021,"wearTruckEngine":0.05608273670077324,"wearTruckTransmission":0.03399086743593216,"wearTruckWheels":0.06766579300165176,"wearTrailerChassis":0.03697485476732254,"wearTrailerWheels":0.049095869064331055,"wearTrailerBody":0.029579881578683853,"cargoDamage":9.439672576263547E-4,"cargoMass":19667,"maxspeed":91,"autoLoad":0,"autoPark":0,"usedDiesel":434.49,"usedAdblue":21.72}
+
+--- FINISH JOB REQUEST ---
+{"status":"Delivered","driven_km":12.7568359375,"userid":3,"income":1766,"market":"external_market","jobid":14,"xp":113,"wearTruckCabin":0.1259818971157074,"wearTruckChassis":0.15747734904289246,"wearTruckEngine":0.05621129646897316,"wearTruckTransmission":0.03411945328116417,"wearTruckWheels":0.06981605291366577,"wearTrailerChassis":0.03904234617948532,"wearTrailerWheels":0.050667546689510345,"wearTrailerBody":0.03123387321829796,"cargoDamage":4.478098126128316E-4,"cargoMass":18180,"maxspeed":88,"autoLoad":0,"autoPark":0,"usedDiesel":9.03,"usedAdblue":0.45}
+
